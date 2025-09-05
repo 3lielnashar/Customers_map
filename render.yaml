@@ -6,7 +6,7 @@ services:
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn app:app
     envVars:
-      - key: mongodb+srv://alielnashar24:a91423097@cluster0.ly8gqfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-        fromSecret: mongodb+srv://alielnashar24:a91423097@cluster0.ly8gqfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
-      - key: AIzaSyDF69V8fQBt8A1DE0JttNPQUAzzSTrQA8M
-        fromSecret: AIzaSyDF69V8fQBt8A1DE0JttNPQUAzzSTrQA8M
+      - key: MONGODB_URI
+        fromSecret: MONGODB_URI
+      - key: GOOGLE_MAPS_API_KEY
+        fromSecret: GOOGLE_MAPS_API_KEY
