@@ -14,40 +14,36 @@ body {
 .container {
     display: flex;
     height: 100vh;
-    flex-direction: column;
+    flex-direction: row; /* Always side-by-side */
 }
 
-/* Mobile-first: Map takes 70% of screen */
+/* Map takes 70% on all devices */
 .map-container {
-    flex: 7; /* 70% of screen */
-    height: 70vh;
-    min-height: 250px;
+    flex: 7; /* 70% width */
+    height: 100vh;
 }
 
 #map {
     height: 100%;
     width: 100%;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
 }
 
-/* Customer pane takes 30% on mobile */
+/* Customer pane takes 30% on all devices */
 .customer-pane {
-    flex: 3; /* 30% of screen */
+    flex: 3; /* 30% width */
     display: flex;
     flex-direction: column;
-    border-top: 2px solid #ccc;
+    border-left: 2px solid #ccc;
     background-color: #f9f9f9;
     overflow: hidden;
 }
 
 .search-container {
-    padding: 10px;
+    padding: 12px;
     display: flex;
     gap: 8px;
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid #ccc;
     background-color: #fff;
-    flex-wrap: wrap;
 }
 
 .search-container input {
@@ -55,7 +51,6 @@ body {
     padding: 10px;
     border: 1px solid #ddd;
     border-radius: 6px;
-    min-width: 120px;
     font-size: 14px;
 }
 
@@ -78,7 +73,7 @@ body {
 }
 
 .customer-item {
-    padding: 10px;
+    padding: 12px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
     transition: background-color 0.2s;
@@ -92,45 +87,42 @@ body {
 }
 
 .customer-item h3 {
-    margin-bottom: 4px;
+    margin-bottom: 5px;
     color: #333;
     font-size: 14px;
-    font-weight: bold;
 }
 
 .customer-item p {
     color: #666;
     font-size: 12px;
-    margin: 2px 0;
+    margin: 3px 0;
     line-height: 1.3;
 }
 
 .customer-item p strong {
     color: #444;
-    font-weight: 600;
 }
 
-/* Action buttons - compact for mobile */
 .action-buttons {
-    padding: 10px;
+    padding: 12px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-    border-top: 1px solid #ddd;
+    gap: 8px;
+    border-top: 1px solid #ccc;
     background-color: #fff;
 }
 
 .action-buttons button {
-    padding: 10px 8px;
+    padding: 12px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 11px;
+    font-size: 12px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    min-height: 40px;
+    min-height: 44px;
 }
 
 #add-btn {
@@ -172,21 +164,20 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: rgba(0, 0, 0, 0.5);
     overflow-y: auto;
 }
 
 .modal-content {
     background-color: #fff;
-    margin: 10% auto;
+    margin: 5% auto;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 8px;
     width: 90%;
     max-width: 500px;
     position: relative;
-    max-height: 80vh;
+    max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .close {
@@ -218,7 +209,7 @@ body {
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 12px;
+    padding: 10px;
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
@@ -244,14 +235,13 @@ body {
 #form-submit {
     background-color: #4CAF50;
     color: white;
-    padding: 14px 15px;
+    padding: 12px 15px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     width: 100%;
     font-size: 16px;
     font-weight: bold;
-    margin-top: 10px;
 }
 
 #form-submit:hover {
@@ -262,7 +252,6 @@ body {
 .selected-customer {
     background-color: #e8f5e8 !important;
     border-left: 4px solid #4CAF50;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Loading and error states */
@@ -270,7 +259,6 @@ body {
     padding: 20px;
     text-align: center;
     color: #666;
-    font-size: 14px;
 }
 
 .error {
@@ -280,84 +268,37 @@ body {
     margin: 10px;
 }
 
-/* ===== RESPONSIVE BREAKPOINTS ===== */
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
 
-/* Tablets and larger phones (768px+) */
-@media (min-width: 768px) {
+/* For very small mobile devices */
+@media (max-width: 480px) {
     .container {
-        flex-direction: row;
+        flex-direction: row; /* Keep side-by-side */
     }
     
     .map-container {
-        height: 100vh;
         flex: 7; /* 70% width */
     }
     
     .customer-pane {
         flex: 3; /* 30% width */
-        border-top: none;
-        border-left: 2px solid #ccc;
     }
     
     .action-buttons {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
-        padding: 12px;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        padding: 10px;
     }
     
     .action-buttons button {
-        font-size: 12px;
-        padding: 12px 8px;
-    }
-    
-    .customer-item h3 {
-        font-size: 15px;
-    }
-    
-    .customer-item p {
-        font-size: 13px;
-    }
-}
-
-/* Desktop (1024px+) */
-@media (min-width: 1024px) {
-    .action-buttons {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-    }
-    
-    .action-buttons button {
-        font-size: 13px;
-        padding: 12px 10px;
+        font-size: 11px;
+        padding: 10px 6px;
+        min-height: 40px;
     }
     
     .search-container {
-        padding: 15px;
-    }
-    
-    .customer-list {
-        padding: 12px;
-    }
-    
-    .customer-item {
-        padding: 12px;
-    }
-}
-
-/* Very small devices (≤480px) - Map takes even more space */
-@media (max-width: 480px) {
-    .map-container {
-        flex: 8; /* 80% of screen */
-        height: 80vh;
-    }
-    
-    .customer-pane {
-        flex: 2; /* 20% of screen */
-    }
-    
-    .search-container {
+        padding: 10px;
         flex-direction: column;
-        padding: 8px;
     }
     
     .search-container input,
@@ -365,26 +306,8 @@ body {
         width: 100%;
     }
     
-    .action-buttons {
-        grid-template-columns: repeat(2, 1fr);
-        padding: 8px;
-        gap: 5px;
-    }
-    
-    .action-buttons button {
-        font-size: 10px;
-        padding: 8px 5px;
-        min-height: 35px;
-    }
-    
-    .modal-content {
-        margin: 5% auto;
-        padding: 15px;
-        width: 95%;
-    }
-    
     .customer-item {
-        padding: 8px;
+        padding: 10px;
     }
     
     .customer-item h3 {
@@ -394,32 +317,49 @@ body {
     .customer-item p {
         font-size: 11px;
     }
+    
+    .modal-content {
+        margin: 10% auto;
+        padding: 15px;
+        width: 95%;
+    }
 }
 
-/* Landscape orientation for mobile - Map takes maximum space */
-@media (max-height: 500px) and (orientation: landscape) {
-    .map-container {
-        height: 75vh;
-        flex: 8;
-    }
-    
-    .customer-pane {
-        height: 25vh;
-        flex: 2;
-    }
-    
-    .customer-list {
-        max-height: 15vh;
-    }
-    
+/* For tablets and larger phones */
+@media (min-width: 481px) and (max-width: 768px) {
     .action-buttons {
-        padding: 6px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
     }
     
     .action-buttons button {
-        font-size: 9px;
-        padding: 6px 4px;
-        min-height: 30px;
+        font-size: 11px;
+        padding: 10px 8px;
+    }
+    
+    .customer-item h3 {
+        font-size: 14px;
+    }
+    
+    .customer-item p {
+        font-size: 12px;
+    }
+}
+
+/* For landscape orientation on mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+    .customer-list {
+        max-height: 60vh;
+    }
+    
+    .action-buttons {
+        padding: 8px;
+    }
+    
+    .action-buttons button {
+        font-size: 10px;
+        padding: 8px 4px;
+        min-height: 35px;
     }
 }
 
@@ -439,5 +379,12 @@ body {
     
     input, textarea {
         font-size: 16px;
+    }
+}
+
+/* High-resolution devices */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .customer-item {
+        border-bottom-width: 0.5px;
     }
 }
