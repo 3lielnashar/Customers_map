@@ -8,6 +8,7 @@ body {
     font-family: Arial, sans-serif;
     height: 100vh;
     overflow: hidden;
+    background-color: #ffffff;
 }
 
 .container {
@@ -16,31 +17,36 @@ body {
     flex-direction: column;
 }
 
+/* Mobile-first: Map takes 70% of screen */
 .map-container {
-    flex: 1;
-    height: 50vh;
-    min-height: 300px;
+    flex: 7; /* 70% of screen */
+    height: 70vh;
+    min-height: 250px;
 }
 
 #map {
     height: 100%;
     width: 100%;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
 }
 
+/* Customer pane takes 30% on mobile */
 .customer-pane {
-    flex: 1;
+    flex: 3; /* 30% of screen */
     display: flex;
     flex-direction: column;
-    border-top: 1px solid #ccc;
+    border-top: 2px solid #ccc;
     background-color: #f9f9f9;
     overflow: hidden;
 }
 
 .search-container {
-    padding: 12px;
+    padding: 10px;
     display: flex;
     gap: 8px;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid #ddd;
+    background-color: #fff;
     flex-wrap: wrap;
 }
 
@@ -50,6 +56,7 @@ body {
     border: 1px solid #ddd;
     border-radius: 6px;
     min-width: 120px;
+    font-size: 14px;
 }
 
 .search-container button {
@@ -60,20 +67,24 @@ body {
     border-radius: 6px;
     cursor: pointer;
     white-space: nowrap;
+    font-weight: bold;
 }
 
 .customer-list {
     flex: 1;
     overflow-y: auto;
     padding: 8px;
+    background-color: #fff;
 }
 
 .customer-item {
-    padding: 12px;
+    padding: 10px;
     border-bottom: 1px solid #eee;
     cursor: pointer;
     transition: background-color 0.2s;
     border-radius: 6px;
+    margin-bottom: 5px;
+    background-color: #fafafa;
 }
 
 .customer-item:hover {
@@ -81,39 +92,45 @@ body {
 }
 
 .customer-item h3 {
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     color: #333;
-    font-size: 16px;
+    font-size: 14px;
+    font-weight: bold;
 }
 
 .customer-item p {
     color: #666;
-    font-size: 13px;
-    margin: 3px 0;
+    font-size: 12px;
+    margin: 2px 0;
+    line-height: 1.3;
 }
 
 .customer-item p strong {
-    color: #333;
+    color: #444;
+    font-weight: 600;
 }
 
+/* Action buttons - compact for mobile */
 .action-buttons {
-    padding: 12px;
+    padding: 10px;
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    border-top: 1px solid #ccc;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    border-top: 1px solid #ddd;
+    background-color: #fff;
 }
 
 .action-buttons button {
-    padding: 12px;
+    padding: 10px 8px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 11px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    min-height: 40px;
 }
 
 #add-btn {
@@ -155,20 +172,21 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(0, 0, 0, 0.7);
     overflow-y: auto;
 }
 
 .modal-content {
     background-color: #fff;
-    margin: 5% auto;
+    margin: 10% auto;
     padding: 20px;
-    border-radius: 8px;
+    border-radius: 10px;
     width: 90%;
     max-width: 500px;
     position: relative;
-    max-height: 90vh;
+    max-height: 80vh;
     overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .close {
@@ -178,6 +196,11 @@ body {
     font-size: 24px;
     font-weight: bold;
     cursor: pointer;
+    color: #666;
+}
+
+.close:hover {
+    color: #000;
 }
 
 .form-group {
@@ -189,15 +212,24 @@ body {
     margin-bottom: 5px;
     font-weight: bold;
     font-size: 14px;
+    color: #333;
 }
 
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
+    background-color: #fff;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #4285F4;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2);
 }
 
 .form-group textarea {
@@ -212,18 +244,25 @@ body {
 #form-submit {
     background-color: #4CAF50;
     color: white;
-    padding: 12px 15px;
+    padding: 14px 15px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     width: 100%;
     font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+#form-submit:hover {
+    background-color: #45a049;
 }
 
 /* Selected customer style */
 .selected-customer {
-    background-color: #e0e0e0 !important;
+    background-color: #e8f5e8 !important;
     border-left: 4px solid #4CAF50;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 /* Loading and error states */
@@ -231,13 +270,19 @@ body {
     padding: 20px;
     text-align: center;
     color: #666;
+    font-size: 14px;
 }
 
 .error {
     color: #f44336;
+    background-color: #ffebee;
+    border-radius: 6px;
+    margin: 10px;
 }
 
-/* Mobile-specific styles */
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* Tablets and larger phones (768px+) */
 @media (min-width: 768px) {
     .container {
         flex-direction: row;
@@ -245,39 +290,74 @@ body {
     
     .map-container {
         height: 100vh;
-        flex: 7;
+        flex: 7; /* 70% width */
     }
     
     .customer-pane {
-        flex: 3;
+        flex: 3; /* 30% width */
         border-top: none;
-        border-left: 1px solid #ccc;
+        border-left: 2px solid #ccc;
     }
     
     .action-buttons {
         grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        padding: 12px;
     }
     
     .action-buttons button {
-        font-size: 14px;
-        padding: 10px;
+        font-size: 12px;
+        padding: 12px 8px;
+    }
+    
+    .customer-item h3 {
+        font-size: 15px;
+    }
+    
+    .customer-item p {
+        font-size: 13px;
     }
 }
 
+/* Desktop (1024px+) */
 @media (min-width: 1024px) {
     .action-buttons {
         grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
     }
     
     .action-buttons button {
+        font-size: 13px;
+        padding: 12px 10px;
+    }
+    
+    .search-container {
+        padding: 15px;
+    }
+    
+    .customer-list {
+        padding: 12px;
+    }
+    
+    .customer-item {
         padding: 12px;
     }
 }
 
-/* Very small devices */
+/* Very small devices (≤480px) - Map takes even more space */
 @media (max-width: 480px) {
+    .map-container {
+        flex: 8; /* 80% of screen */
+        height: 80vh;
+    }
+    
+    .customer-pane {
+        flex: 2; /* 20% of screen */
+    }
+    
     .search-container {
         flex-direction: column;
+        padding: 8px;
     }
     
     .search-container input,
@@ -287,20 +367,59 @@ body {
     
     .action-buttons {
         grid-template-columns: repeat(2, 1fr);
+        padding: 8px;
+        gap: 5px;
+    }
+    
+    .action-buttons button {
+        font-size: 10px;
+        padding: 8px 5px;
+        min-height: 35px;
     }
     
     .modal-content {
-        margin: 10% auto;
+        margin: 5% auto;
         padding: 15px;
         width: 95%;
     }
     
+    .customer-item {
+        padding: 8px;
+    }
+    
     .customer-item h3 {
-        font-size: 14px;
+        font-size: 13px;
     }
     
     .customer-item p {
-        font-size: 12px;
+        font-size: 11px;
+    }
+}
+
+/* Landscape orientation for mobile - Map takes maximum space */
+@media (max-height: 500px) and (orientation: landscape) {
+    .map-container {
+        height: 75vh;
+        flex: 8;
+    }
+    
+    .customer-pane {
+        height: 25vh;
+        flex: 2;
+    }
+    
+    .customer-list {
+        max-height: 15vh;
+    }
+    
+    .action-buttons {
+        padding: 6px;
+    }
+    
+    .action-buttons button {
+        font-size: 9px;
+        padding: 6px 4px;
+        min-height: 30px;
     }
 }
 
@@ -315,69 +434,10 @@ body {
     }
     
     button {
-        min-height: 44px; /* Better touch targets */
+        min-height: 44px;
     }
     
     input, textarea {
-        font-size: 16px; /* Prevent zoom on iOS */
-    }
-}
-
-/* Landscape orientation for mobile */
-@media (max-height: 500px) and (orientation: landscape) {
-    .map-container {
-        height: 60vh;
-    }
-    
-    .customer-pane {
-        height: 40vh;
-    }
-}
-
-/* High-resolution devices */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .customer-item {
-        border-bottom-width: 0.5px;
-    }
-}
-
-/* Dark mode support (optional) */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #1a1a1a;
-        color: #ffffff;
-    }
-    
-    .customer-pane {
-        background-color: #2d2d2d;
-        border-color: #444;
-    }
-    
-    .customer-item {
-        border-color: #444;
-    }
-    
-    .customer-item:hover {
-        background-color: #3a3a3a;
-    }
-    
-    .selected-customer {
-        background-color: #3a3a3a !important;
-    }
-    
-    .search-container,
-    .action-buttons {
-        border-color: #444;
-    }
-    
-    input, textarea {
-        background-color: #2d2d2d;
-        color: #ffffff;
-        border-color: #555;
-    }
-    
-    .modal-content {
-        background-color: #2d2d2d;
-        color: #ffffff;
+        font-size: 16px;
     }
 }
