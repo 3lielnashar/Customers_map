@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: customer-map-app
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: mongodb+srv://alielnashar24:a91423097@cluster0.ly8gqfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+        fromSecret: mongodb+srv://alielnashar24:a91423097@cluster0.ly8gqfr.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
+      - key: AIzaSyDF69V8fQBt8A1DE0JttNPQUAzzSTrQA8M
+        fromSecret: AIzaSyDF69V8fQBt8A1DE0JttNPQUAzzSTrQA8M
