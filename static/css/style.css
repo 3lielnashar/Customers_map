@@ -14,13 +14,13 @@ body {
 .container {
     display: flex;
     height: 100vh;
-    flex-direction: row; /* Always side-by-side */
+    flex-direction: row;
 }
 
-/* Map takes 70% on all devices */
 .map-container {
-    flex: 7; /* 70% width */
+    flex: 7;
     height: 100vh;
+    position: relative;
 }
 
 #map {
@@ -28,9 +28,75 @@ body {
     width: 100%;
 }
 
-/* Customer pane takes 30% on all devices */
+.map-controls {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    z-index: 1000;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+.search-places-container {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.search-places-container input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-places-container button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+#places-search-btn {
+    background-color: #4285F4;
+    color: white;
+}
+
+#get-directions-btn {
+    background-color: #34A853;
+    color: white;
+}
+
+#clear-places-search, #clear-directions {
+    background-color: #666;
+    color: white;
+}
+
+.location-selection-info {
+    background-color: #e8f5e8;
+    padding: 10px;
+    border-radius: 4px;
+    border-left: 4px solid #4CAF50;
+}
+
+.location-selection-info p {
+    margin: 0;
+    color: #2e7d32;
+    font-size: 14px;
+    font-weight: bold;
+}
+
 .customer-pane {
-    flex: 3; /* 30% width */
+    flex: 3;
     display: flex;
     flex-direction: column;
     border-left: 2px solid #ccc;
@@ -106,7 +172,7 @@ body {
 .action-buttons {
     padding: 12px;
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     border-top: 1px solid #ccc;
     background-color: #fff;
@@ -125,35 +191,23 @@ body {
     min-height: 44px;
 }
 
-#add-btn {
-    background-color: #4CAF50;
-    color: white;
+.action-buttons button:disabled {
+    background-color: #ccc !important;
+    cursor: not-allowed;
+    opacity: 0.6;
 }
 
-#update-btn {
-    background-color: #2196F3;
+#add-btn { 
+    background-color: #4CAF50; 
     color: white;
+    grid-column: span 2;
 }
 
-#delete-btn {
-    background-color: #f44336;
-    color: white;
-}
-
-#export-btn {
-    background-color: #FF9800;
-    color: white;
-}
-
-#import-btn {
-    background-color: #9C27B0;
-    color: white;
-}
-
-#recenter-btn {
-    background-color: #4285F4;
-    color: white;
-}
+#update-btn { background-color: #2196F3; color: white; }
+#delete-btn { background-color: #f44336; color: white; }
+#export-btn { background-color: #FF9800; color: white; }
+#import-btn { background-color: #9C27B0; color: white; }
+#recenter-btn { background-color: #4285F4; color: white; }
 
 /* Modal Styles */
 .modal {
@@ -171,7 +225,7 @@ body {
 .modal-content {
     background-color: #fff;
     margin: 5% auto;
-    padding: 20px;
+    padding: 25px;
     border-radius: 8px;
     width: 90%;
     max-width: 500px;
@@ -194,13 +248,31 @@ body {
     color: #000;
 }
 
+.selected-location-info {
+    background-color: #f0f7ff;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid #4285F4;
+}
+
+.selected-location-info h3 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.location-details p {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
 .form-group {
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
     font-weight: bold;
     font-size: 14px;
     color: #333;
@@ -209,7 +281,7 @@ body {
 .form-group input,
 .form-group textarea {
     width: 100%;
-    padding: 10px;
+    padding: 12px;
     border: 1px solid #ddd;
     border-radius: 6px;
     font-size: 14px;
@@ -228,20 +300,17 @@ body {
     resize: vertical;
 }
 
-.form-group textarea#address {
-    height: 60px;
-}
-
 #form-submit {
     background-color: #4CAF50;
     color: white;
-    padding: 12px 15px;
+    padding: 15px;
     border: none;
     border-radius: 6px;
     cursor: pointer;
     width: 100%;
     font-size: 16px;
     font-weight: bold;
+    margin-top: 10px;
 }
 
 #form-submit:hover {
@@ -254,7 +323,6 @@ body {
     border-left: 4px solid #4CAF50;
 }
 
-/* Loading and error states */
 .loading, .error {
     padding: 20px;
     text-align: center;
@@ -268,68 +336,58 @@ body {
     margin: 10px;
 }
 
-/* ===== RESPONSIVE ADJUSTMENTS ===== */
+/* Marker styles */
+.green-marker {
+    background-color: #4CAF50 !important;
+}
 
-/* For very small mobile devices */
-@media (max-width: 480px) {
+.orange-marker {
+    background-color: #FF9800 !important;
+}
+
+/* Directions polyline */
+.directions-route {
+    stroke: #4285F4;
+    stroke-opacity: 0.8;
+    stroke-width: 5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
     .container {
-        flex-direction: row; /* Keep side-by-side */
-    }
-    
-    .map-container {
-        flex: 7; /* 70% width */
-    }
-    
-    .customer-pane {
-        flex: 3; /* 30% width */
-    }
-    
-    .action-buttons {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
-        padding: 10px;
-    }
-    
-    .action-buttons button {
-        font-size: 11px;
-        padding: 10px 6px;
-        min-height: 40px;
-    }
-    
-    .search-container {
-        padding: 10px;
         flex-direction: column;
     }
     
-    .search-container input,
-    .search-container button {
-        width: 100%;
+    .map-container {
+        flex: 1;
+        height: 50vh;
     }
     
-    .customer-item {
-        padding: 10px;
+    .customer-pane {
+        flex: 1;
+        height: 50vh;
     }
     
-    .customer-item h3 {
-        font-size: 13px;
+    .search-places-container {
+        flex-direction: column;
     }
     
-    .customer-item p {
-        font-size: 11px;
+    .search-places-container input {
+        min-width: 100%;
     }
     
-    .modal-content {
-        margin: 10% auto;
-        padding: 15px;
-        width: 95%;
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    #add-btn {
+        grid-column: span 1;
     }
 }
 
-/* For tablets and larger phones */
-@media (min-width: 481px) and (max-width: 768px) {
-    .action-buttons {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 8px;
+@media (max-width: 480px) {
+    .map-controls {
+        padding: 10px;
     }
     
     .action-buttons button {
@@ -337,54 +395,9 @@ body {
         padding: 10px 8px;
     }
     
-    .customer-item h3 {
-        font-size: 14px;
-    }
-    
-    .customer-item p {
-        font-size: 12px;
-    }
-}
-
-/* For landscape orientation on mobile */
-@media (max-height: 500px) and (orientation: landscape) {
-    .customer-list {
-        max-height: 60vh;
-    }
-    
-    .action-buttons {
-        padding: 8px;
-    }
-    
-    .action-buttons button {
-        font-size: 10px;
-        padding: 8px 4px;
-        min-height: 35px;
-    }
-}
-
-/* Touch device improvements */
-@media (hover: none) and (pointer: coarse) {
-    .customer-item:hover {
-        background-color: inherit;
-    }
-    
-    .customer-item:active {
-        background-color: #f0f0f0;
-    }
-    
-    button {
-        min-height: 44px;
-    }
-    
-    input, textarea {
-        font-size: 16px;
-    }
-}
-
-/* High-resolution devices */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .customer-item {
-        border-bottom-width: 0.5px;
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+        padding: 15px;
     }
 }
