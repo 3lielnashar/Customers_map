@@ -7,6 +7,8 @@ import math
 import csv
 import io
 from flask import send_file
+import requests
+from math import radians, sin, cos, sqrt, atan2
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
@@ -75,7 +77,53 @@ def get_customer(customer_id):
     except:
         return jsonify({'error': 'Invalid customer ID'}), 400
 
-# Add a new customer
+# Geocode coordinates to address
+def geocode_coordinates(lat, lng):
+    try:
+        url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={lat},{lng}&key={GOOGLE_MAPS_API_KEY}"
+        response = requests.get(url)
+        data = response.json()
+        
+        if data['status'] == 'OK' and data['results']:
+            return data['results'][0]['formatted_address']
+        else:
+            return "Address not found"
+    except Exception as e:
+        print(f"Geocoding error: {e}")
+        return "Address lookup failed"
+
+# Calculate distance between two coordinates using Haversine formula
+def calculate_distance(lat1, lng1, lat2, lng2):
+    R = 6371  # Earth radius in kilometers
+    
+    lat1_rad = radians(lat1)
+    lat2_rad = radians(lat2)
+    delta_lat = radians(lat2 - lat1)
+    delta_lng = radians(lng2 - lng1)
+    
+    a = sin(delta_lat/2) * sin(delta_lat/2) + cos(lat1_rad) * cos(lat2_rad) * sin(delta_lng/2) * sin(delta_lng/2)
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    
+    return R * c  # Distance in kilometers
+
+# Find nearest customer
+def find_nearest_customer(lat, lng):
+    all_customers = list(collection.find({}))
+    
+    if not all_customers:
+        return None
+    
+    nearest_customer = None
+    min_distance = float('inf')
+    
+    for customer in all_customers:
+        distance = calculate_distance(lat, lng, customer['lat'], customer['lng'])
+        if distance < min_distance:
+            min_distance = distance
+            nearest_customer = customer
+    
+    return nearest_customer
+
 @app.route('/api/customers', methods=['POST'])
 def add_customer():
     data = request.get_json()
@@ -83,19 +131,35 @@ def add_customer():
     if not data.get('name') or not data.get('lat') or not data.get('lng'):
         return jsonify({'error': 'Name, lat, and lng are required'}), 400
     
+    # Get address from coordinates using geocoding (AFTER form submission)
+    address = geocode_coordinates(data['lat'], data['lng'])
+    data['Address'] = address
+    
     # Set default values for optional fields
-    for field in ['Description', 'Comment', 'Address']:
+    for field in ['Description', 'Comment']:
         if field not in data or not data[field]:
             data[field] = ""
     
+    # Insert the new customer
     result = collection.insert_one(data)
-    return jsonify({'_id': str(result.inserted_id), 'message': 'Customer added successfully'}), 201
+    new_customer_id = str(result.inserted_id)
+    
+    return jsonify({
+        '_id': new_customer_id, 
+        'message': 'Customer added successfully',
+        'address': address
+    }), 201
 
 # Update a customer
 @app.route('/api/customers/<customer_id>', methods=['PUT'])
 def update_customer(customer_id):
     data = request.get_json()
     try:
+        # If lat/lng changed, update address
+        if 'lat' in data and 'lng' in data:
+            address = geocode_coordinates(data['lat'], data['lng'])
+            data['Address'] = address
+        
         result = collection.update_one({'_id': ObjectId(customer_id)}, {'$set': data})
         if result.modified_count:
             return jsonify({'message': 'Customer updated successfully'})
@@ -121,6 +185,41 @@ def delete_customer_by_name(name):
     if result.deleted_count:
         return jsonify({'message': 'Customer deleted successfully'})
     return jsonify({'error': 'Customer not found'}), 404
+
+# Search for places using Google Places API
+@app.route('/api/places/search', methods=['GET'])
+def search_places():
+    query = request.args.get('query', '')
+    
+    if not query:
+        return jsonify({'error': 'Query parameter is required'}), 400
+    
+    try:
+        url = f"https://maps.googleapis.com/maps/api/place/textsearch/json?query={query}&key={GOOGLE_MAPS_API_KEY}"
+        response = requests.get(url)
+        data = response.json()
+        
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': f'Place search failed: {str(e)}'}), 500
+
+# Get directions between two points
+@app.route('/api/directions', methods=['GET'])
+def get_directions():
+    origin = request.args.get('origin', '')
+    destination = request.args.get('destination', '')
+    
+    if not origin or not destination:
+        return jsonify({'error': 'Origin and destination parameters are required'}), 400
+    
+    try:
+        url = f"https://maps.googleapis.com/maps/api/directions/json?origin={origin}&destination={destination}&key={GOOGLE_MAPS_API_KEY}"
+        response = requests.get(url)
+        data = response.json()
+        
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({'error': f'Directions request failed: {str(e)}'}), 500
 
 # Export customers as CSV
 @app.route('/api/customers/export', methods=['GET'])
