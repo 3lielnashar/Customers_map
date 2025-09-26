@@ -109,26 +109,6 @@ function initAutocomplete() {
         
         placeSearchMarkers.push(marker);
         
-        // Show info window with directions button
-        const infoWindow = new google.maps.InfoWindow({
-            content: `
-                <div>
-                    <h3>${place.name}</h3>
-                    <p>${place.formatted_address || 'Address not available'}</p>
-                    <button onclick="getDirectionsToPlace(${place.geometry.location.lat()}, ${place.geometry.location.lng()})" 
-                            style="margin-top: 10px; padding: 8px 12px; background: #4285F4; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">
-                        Get Directions from My Location
-                    </button>
-                </div>
-            `
-        });
-        
-        marker.addListener('click', () => {
-            infoWindow.open(map, marker);
-        });
-        
-        infoWindow.open(map, marker);
-        
         // Center map on the place
         map.setCenter(place.geometry.location);
         map.setZoom(15);
@@ -136,6 +116,36 @@ function initAutocomplete() {
         // Show clear button
         document.getElementById('clear-places-search').style.display = 'inline-block';
     });
+}
+
+// Create marker icons based on description presence
+function createMarkerIcon(hasDescription) {
+    const color = hasDescription ? '#FFC107' : '#EA4335'; // Yellow if has description, Red if not
+    
+    return {
+        url: "data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="${color}" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.5" fill="white"/>
+            </svg>
+        `),
+        scaledSize: new google.maps.Size(30, 30),
+        anchor: new google.maps.Point(15, 30)
+    };
+}
+
+// Create black marker icon for selected customer
+function createBlackMarkerIcon() {
+    return {
+        url: "data:image/svg+xml;base64," + btoa(`
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path fill="#000000" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+                <circle cx="12" cy="9" r="2.5" fill="white"/>
+            </svg>
+        `),
+        scaledSize: new google.maps.Size(30, 30),
+        anchor: new google.maps.Point(15, 30)
+    };
 }
 
 // Handle map click for location selection
@@ -327,7 +337,8 @@ function displayCustomers(customers) {
         customerItem.innerHTML = `
             <h3>${customer.name}</h3>
             <p><strong>Address:</strong> ${customer.Address || 'No address'}</p>
-            <p>${customer.Description || 'No description'}</p>
+            <p><strong>Description:</strong> ${customer.Description || 'No description'}</p>
+            <p><strong>Comment:</strong> ${customer.Comment || 'No comment'}</p>
         `;
         
         customerItem.addEventListener('click', () => {
@@ -338,35 +349,9 @@ function displayCustomers(customers) {
     });
 }
 
-// Create marker icons
-function createRedMarkerIcon() {
-    return {
-        url: "data:image/svg+xml;base64," + btoa(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path fill="#EA4335" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                <circle cx="12" cy="9" r="2.5" fill="white"/>
-            </svg>
-        `),
-        scaledSize: new google.maps.Size(30, 30),
-        anchor: new google.maps.Point(15, 30)
-    };
-}
-
-function createBlackMarkerIcon() {
-    return {
-        url: "data:image/svg+xml;base64," + btoa(`
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                <path fill="#000000" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
-                <circle cx="12" cy="9" r="2.5" fill="white"/>
-            </svg>
-        `),
-        scaledSize: new google.maps.Size(30, 30),
-        anchor: new google.maps.Point(15, 30)
-    };
-}
-
-// Place markers on map
+// Place markers on map with color coding based on description
 function placeMarkers(customers) {
+    // Clear existing markers (except current location and selected location markers)
     markers.forEach(marker => {
         if (marker !== currentLocationMarker && marker !== selectedLocationMarker) {
             marker.setMap(null);
@@ -378,15 +363,23 @@ function placeMarkers(customers) {
     );
     
     customers.forEach(customer => {
+        // Check if customer has description
+        const hasDescription = customer.Description && customer.Description.trim() !== '';
+        
         const marker = new google.maps.Marker({
             position: { lat: parseFloat(customer.lat), lng: parseFloat(customer.lng) },
             map: map,
             title: customer.name,
-            icon: createRedMarkerIcon()
+            icon: createMarkerIcon(hasDescription)
         });
         
         marker.addListener('click', () => {
             selectCustomer(customer._id);
+            
+            // Fill the search bar with the customer's address
+            if (customer.Address && customer.Address.trim() !== '') {
+                document.getElementById('places-search-input').value = customer.Address;
+            }
         });
         
         markers.push(marker);
@@ -395,14 +388,23 @@ function placeMarkers(customers) {
 
 // Select customer
 function selectCustomer(customerId) {
+    // Reset all markers to their original colors
     markers.forEach(marker => {
         if (marker !== currentLocationMarker && marker !== selectedLocationMarker) {
-            marker.setIcon(createRedMarkerIcon());
+            const customer = customers.find(c => 
+                Math.abs(c.lat - marker.getPosition().lat()) < 0.0001 && 
+                Math.abs(c.lng - marker.getPosition().lng()) < 0.0001
+            );
+            if (customer) {
+                const hasDescription = customer.Description && customer.Description.trim() !== '';
+                marker.setIcon(createMarkerIcon(hasDescription));
+            }
         }
     });
     
     selectedCustomerId = customerId;
     
+    // Highlight the selected customer in the list
     document.querySelectorAll('.customer-item').forEach(item => {
         if (item.dataset.id === customerId) {
             item.classList.add('selected-customer');
@@ -412,6 +414,7 @@ function selectCustomer(customerId) {
         }
     });
     
+    // Find and highlight the selected customer's marker
     const customer = customers.find(c => c._id === customerId);
     if (customer) {
         map.setCenter({ lat: parseFloat(customer.lat), lng: parseFloat(customer.lng) });
@@ -420,8 +423,8 @@ function selectCustomer(customerId) {
         const marker = markers.find(m => 
             m !== currentLocationMarker && 
             m !== selectedLocationMarker &&
-            m.getPosition().lat() === parseFloat(customer.lat) && 
-            m.getPosition().lng() === parseFloat(customer.lng)
+            Math.abs(m.getPosition().lat() - parseFloat(customer.lat)) < 0.0001 && 
+            Math.abs(m.getPosition().lng() - parseFloat(customer.lng)) < 0.0001
         );
         
         if (marker) {
@@ -460,6 +463,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('modal');
     const closeBtn = document.querySelector('.close');
     const customerForm = document.getElementById('customer-form');
+    const modalTitle = document.getElementById('modal-title');
+    const formSubmit = document.getElementById('form-submit');
     
     // Close modal
     closeBtn.addEventListener('click', () => {
@@ -479,6 +484,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Set modal for adding
+        modalTitle.textContent = 'Add Customer';
+        formSubmit.textContent = 'Add Customer';
+        document.getElementById('customer-id').value = '';
+        
         // Fill the modal with selected location info (coordinates only)
         document.getElementById('selected-coordinates').textContent = 
             `${selectedLocation.lat.toFixed(6)}, ${selectedLocation.lng.toFixed(6)}`;
@@ -493,6 +503,60 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('comment').value = '';
         
         modal.style.display = 'block';
+    });
+    
+    // Update customer button - FIXED
+    document.getElementById('update-btn').addEventListener('click', () => {
+        if (!selectedCustomerId) {
+            alert('Please select a customer to update');
+            return;
+        }
+        
+        const customer = customers.find(c => c._id === selectedCustomerId);
+        if (customer) {
+            // Set modal for updating
+            modalTitle.textContent = 'Update Customer';
+            formSubmit.textContent = 'Update Customer';
+            
+            document.getElementById('customer-id').value = customer._id;
+            document.getElementById('name').value = customer.name;
+            document.getElementById('description').value = customer.Description || '';
+            document.getElementById('comment').value = customer.Comment || '';
+            document.getElementById('selected-coordinates').textContent = 
+                `${customer.lat}, ${customer.lng}`;
+            document.getElementById('selected-address').textContent = customer.Address || 'No address';
+            document.getElementById('lat').value = customer.lat;
+            document.getElementById('lng').value = customer.lng;
+            
+            modal.style.display = 'block';
+        }
+    });
+    
+    // Delete customer button
+    document.getElementById('delete-btn').addEventListener('click', async () => {
+        if (!selectedCustomerId) {
+            alert('Please select a customer to delete');
+            return;
+        }
+        
+        if (confirm('Are you sure you want to delete this customer?')) {
+            try {
+                const response = await fetch(`${BASE_URL}/api/customers/${selectedCustomerId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    alert('Customer deleted successfully');
+                    loadCustomers();
+                    selectedCustomerId = null;
+                } else {
+                    const result = await response.json();
+                    alert(`Error: ${result.error}`);
+                }
+            } catch (error) {
+                alert('Error deleting customer');
+            }
+        }
     });
     
     // Search customers
@@ -527,16 +591,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Clear places search
     document.getElementById('clear-places-search').addEventListener('click', clearPlaceSearchMarkers);
     
-    // Clear directions
-    document.getElementById('clear-directions').addEventListener('click', clearDirections);
-    
     // Recenter button
     document.getElementById('recenter-btn').addEventListener('click', recenterToMyLocation);
     
-    // Form submission
+    // Form submission - HANDLES BOTH ADD AND UPDATE
     customerForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        const customerId = document.getElementById('customer-id').value;
         const name = document.getElementById('name').value;
         const description = document.getElementById('description').value;
         const comment = document.getElementById('comment').value;
@@ -558,8 +620,20 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         
         try {
-            const response = await fetch(`${BASE_URL}/api/customers`, {
-                method: 'POST',
+            let url, method;
+            
+            if (customerId) {
+                // UPDATE existing customer
+                url = `${BASE_URL}/api/customers/${customerId}`;
+                method = 'PUT';
+            } else {
+                // ADD new customer
+                url = `${BASE_URL}/api/customers`;
+                method = 'POST';
+            }
+            
+            const response = await fetch(url, {
+                method: method,
                 headers: {
                     'Content-Type': 'application/json'
                 },
@@ -569,79 +643,31 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
             
             if (response.ok) {
-                alert(`Customer added successfully!\nAddress: ${result.address}`);
+                alert(customerId ? 'Customer updated successfully!' : `Customer added successfully!\nAddress: ${result.address}`);
                 modal.style.display = 'none';
                 
-                // Reset selection
-                if (selectedLocationMarker) {
-                    selectedLocationMarker.setMap(null);
-                    selectedLocationMarker = null;
+                if (!customerId) {
+                    // Reset selection only for new customers
+                    if (selectedLocationMarker) {
+                        selectedLocationMarker.setMap(null);
+                        selectedLocationMarker = null;
+                    }
+                    selectedLocation = null;
+                    document.getElementById('add-btn').disabled = true;
+                    document.getElementById('add-btn').textContent = 'Add Customer (Select location first)';
+                    document.getElementById('add-btn').style.backgroundColor = '#ccc';
+                    document.getElementById('location-selection-text').innerHTML = 
+                        '📍 Click anywhere on the map to select a location (green marker will appear)';
                 }
-                selectedLocation = null;
-                document.getElementById('add-btn').disabled = true;
-                document.getElementById('add-btn').textContent = 'Add Customer (Select location first)';
-                document.getElementById('add-btn').style.backgroundColor = '#ccc';
-                document.getElementById('location-selection-text').innerHTML = 
-                    '📍 Click anywhere on the map to select a location (green marker will appear)';
                 
                 // Reload customers
                 loadCustomers();
+                selectedCustomerId = null;
             } else {
                 alert(`Error: ${result.error}`);
             }
         } catch (error) {
-            alert('Error adding customer');
-        }
-    });
-    
-    // Update customer button
-    document.getElementById('update-btn').addEventListener('click', () => {
-        if (!selectedCustomerId) {
-            alert('Please select a customer to update');
-            return;
-        }
-        
-        const customer = customers.find(c => c._id === selectedCustomerId);
-        if (customer) {
-            document.getElementById('modal-title').textContent = 'Update Customer';
-            document.getElementById('customer-id').value = customer._id;
-            document.getElementById('name').value = customer.name;
-            document.getElementById('description').value = customer.Description || '';
-            document.getElementById('comment').value = customer.Comment || '';
-            document.getElementById('selected-address').textContent = customer.Address || 'No address';
-            document.getElementById('selected-coordinates').textContent = 
-                `${customer.lat}, ${customer.lng}`;
-            document.getElementById('lat').value = customer.lat;
-            document.getElementById('lng').value = customer.lng;
-            document.getElementById('form-submit').textContent = 'Update Customer';
-            modal.style.display = 'block';
-        }
-    });
-    
-    // Delete customer button
-    document.getElementById('delete-btn').addEventListener('click', async () => {
-        if (!selectedCustomerId) {
-            alert('Please select a customer to delete');
-            return;
-        }
-        
-        if (confirm('Are you sure you want to delete this customer?')) {
-            try {
-                const response = await fetch(`${BASE_URL}/api/customers/${selectedCustomerId}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    alert('Customer deleted successfully');
-                    loadCustomers();
-                    selectedCustomerId = null;
-                } else {
-                    const result = await response.json();
-                    alert(`Error: ${result.error}`);
-                }
-            } catch (error) {
-                alert('Error deleting customer');
-            }
+            alert('Error saving customer');
         }
     });
     
@@ -713,4 +739,14 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('places-search-btn').click();
         }
     });
+    
+    // Add "Get Directions" button functionality for customer markers
+    window.getDirectionsToCustomer = function(customerId) {
+        const customer = customers.find(c => c._id === customerId);
+        if (customer && currentLocationMarker) {
+            getDirectionsToPlace(customer.lat, customer.lng);
+        } else {
+            alert('Please wait for your current location to be detected');
+        }
+    };
 });

@@ -71,12 +71,7 @@ body {
     color: white;
 }
 
-#get-directions-btn {
-    background-color: #34A853;
-    color: white;
-}
-
-#clear-places-search, #clear-directions {
+#clear-places-search {
     background-color: #666;
     color: white;
 }
@@ -334,22 +329,6 @@ body {
     background-color: #ffebee;
     border-radius: 6px;
     margin: 10px;
-}
-
-/* Marker styles */
-.green-marker {
-    background-color: #4CAF50 !important;
-}
-
-.orange-marker {
-    background-color: #FF9800 !important;
-}
-
-/* Directions polyline */
-.directions-route {
-    stroke: #4285F4;
-    stroke-opacity: 0.8;
-    stroke-width: 5;
 }
 
 /* Responsive adjustments */

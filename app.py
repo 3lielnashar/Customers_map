@@ -92,38 +92,7 @@ def geocode_coordinates(lat, lng):
         print(f"Geocoding error: {e}")
         return "Address lookup failed"
 
-# Calculate distance between two coordinates using Haversine formula
-def calculate_distance(lat1, lng1, lat2, lng2):
-    R = 6371  # Earth radius in kilometers
-    
-    lat1_rad = radians(lat1)
-    lat2_rad = radians(lat2)
-    delta_lat = radians(lat2 - lat1)
-    delta_lng = radians(lng2 - lng1)
-    
-    a = sin(delta_lat/2) * sin(delta_lat/2) + cos(lat1_rad) * cos(lat2_rad) * sin(delta_lng/2) * sin(delta_lng/2)
-    c = 2 * atan2(sqrt(a), sqrt(1-a))
-    
-    return R * c  # Distance in kilometers
-
-# Find nearest customer
-def find_nearest_customer(lat, lng):
-    all_customers = list(collection.find({}))
-    
-    if not all_customers:
-        return None
-    
-    nearest_customer = None
-    min_distance = float('inf')
-    
-    for customer in all_customers:
-        distance = calculate_distance(lat, lng, customer['lat'], customer['lng'])
-        if distance < min_distance:
-            min_distance = distance
-            nearest_customer = customer
-    
-    return nearest_customer
-
+# Add a new customer
 @app.route('/api/customers', methods=['POST'])
 def add_customer():
     data = request.get_json()
@@ -150,12 +119,12 @@ def add_customer():
         'address': address
     }), 201
 
-# Update a customer
+# Update a customer - FIXED VERSION
 @app.route('/api/customers/<customer_id>', methods=['PUT'])
 def update_customer(customer_id):
     data = request.get_json()
     try:
-        # If lat/lng changed, update address
+        # If lat/lng changed, update address using geocoding
         if 'lat' in data and 'lng' in data:
             address = geocode_coordinates(data['lat'], data['lng'])
             data['Address'] = address
@@ -164,7 +133,8 @@ def update_customer(customer_id):
         if result.modified_count:
             return jsonify({'message': 'Customer updated successfully'})
         return jsonify({'error': 'Customer not found'}), 404
-    except:
+    except Exception as e:
+        print(f"Update error: {e}")
         return jsonify({'error': 'Invalid customer ID'}), 400
 
 # Delete a customer by ID
